@@ -1,0 +1,14 @@
+
+<ion-header>
+ <ion-navbar>
+    <header-logo text="Captura" instructions="Identifica y envía para su aprobación"></header-logo>
+ </ion-navbar>
+</ion-header>
+
+
+<ion-content no-padding>
+  <ion-list no-padding>
+    <photo-request *ngFor="let photo of capturas" [image]="photo"></photo-request>
+  </ion-list>
+
+</ion-content>

@@ -1,0 +1,68 @@
+<ion-header>
+  <ion-navbar primary>
+    <header-logo text="Configuración de usuario" ></header-logo>
+  </ion-navbar>
+</ion-header>
+<ion-content>
+  <ion-list>
+    <ion-list-header>
+      <ion-avatar item-start (click)="updateProfileImage()">
+        <img [src]="user.imageUrl ? user.imageUrl : placeholderPicture">
+      </ion-avatar>
+      <ion-input type="text" class="username" [(ngModel)]="user.name" no-border></ion-input>
+      <ion-label stacked>Propietario</ion-label>
+    </ion-list-header>
+  </ion-list>
+  <ion-list no-border>
+    <ion-list-header>
+      General
+    </ion-list-header>
+    <ion-item>
+      <ion-toggle [(ngModel)]="user.enableNotifications" (click)="toggleNotifications()"></ion-toggle>
+      <ion-label class="label"> Habilitar notificaciones </ion-label>
+      <ion-icon name='notifications' item-start></ion-icon>
+    </ion-item>
+    <ion-item>
+      <ion-toggle [(ngModel)]="user.enableBackup" (click)="toggleBackup()"></ion-toggle>
+      <ion-label class="label"> Habilitar salvaguarda </ion-label>
+      <ion-icon name='cloud-upload' item-start></ion-icon>
+    </ion-item>
+  </ion-list>
+  <ion-list>
+    <ion-list-header>
+      Redes sociales
+    </ion-list-header>
+    <ion-item>
+      <ion-toggle [(ngModel)]="user.enableFacebook" (click)="toggleSocial('facebook')"></ion-toggle>
+      <ion-icon name='logo-facebook' item-start></ion-icon>
+      <ion-label>Facebook</ion-label>
+    </ion-item>
+    <ion-item>
+      <ion-toggle [(ngModel)]="user.enableInstagram" (click)="toggleSocial('instagram')"></ion-toggle>
+      <ion-icon name='logo-instagram' item-start></ion-icon>
+      <ion-label>Instagram</ion-label>
+    </ion-item>
+    <ion-item>
+      <ion-toggle [(ngModel)]="user.enableTwitter" (click)="toggleSocial('twitter')"></ion-toggle>
+      <ion-icon name='logo-twitter' item-start></ion-icon>
+      <ion-label>Twitter</ion-label>
+    </ion-item>
+    <ion-item>
+      <ion-toggle [(ngModel)]="user.enableWeb" (click)="toggleSocial('web')"></ion-toggle>
+      <ion-icon name='globe' item-start></ion-icon>
+      <ion-label>Web</ion-label>
+    </ion-item>
+
+  </ion-list>
+  <ion-list>
+    <ion-list-header>
+      Otros
+    </ion-list-header>
+    <ion-item>
+      <ion-icon name='power' item-start></ion-icon>
+      <button ion-button (click)="logOut()" item-end>
+        Salir
+      </button>
+    </ion-item>
+  </ion-list>
+</ion-content>

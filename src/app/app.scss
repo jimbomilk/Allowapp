@@ -14,3 +14,134 @@
 // To declare rules for a specific mode, create a child rule
 // for the .md, .ios, or .wp mode classes. The mode class is
 // automatically applied to the <body> element in the app.
+
+
+@font-face {
+  font-family: 'star_avenueregular';
+  src: url('../assets/fonts/staravenue-webfont.woff2') format('woff2'),
+  url('../assets/fonts/staravenue-webfont.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-stretch: ultra-expanded;
+}
+
+ion-card {
+  position: relative;
+  text-align: center;
+}
+
+.card-title {
+  position: absolute;
+  top: 13%;
+  font-size: 2.0em;
+  width: 100%;
+  font-weight: bold;
+  color: #fff;
+}
+
+.card-subtitle {
+  font-size: 1.0em;
+  position: absolute;
+  top: 22%;
+  width: 100%;
+  color: #fff;
+}
+
+.card-content {
+  font-size: 1.0em;
+  color: #000;
+}
+
+.card-details {
+  text-align: left;
+  font-size: 1em;
+
+}
+
+.card-details-title {
+  width: 100%;
+  text-align: left;
+  font-weight: bold;
+  font-size: 0.9em;
+}
+
+.social_list{
+  .item-md {
+    height: 0.8rem;
+    line-height: 0.8rem;
+    padding: 0px;
+    margin: 0px;
+  }
+  .toggle-md{
+    height:12px;
+
+  }
+  .label-md{
+    margin:0px;
+  }
+  .item-block{
+    min-height: 3rem;
+  }
+
+
+}
+
+
+.danger{
+  color: rgb(255,0,0) !important;
+}
+
+.border_bottom{
+  border-bottom: 3px solid rgb(246, 211, 87);
+}
+
+.label-md {
+  margin: 6px 6px 6px 0;
+}
+
+
+.toolbar-background {
+  background-color: #34495e;
+}
+
+
+ion-icon {
+  &[class*="allowapp-"] {
+    // Instead of using the font-based icons
+    // We're applying SVG masks
+    mask-size: contain;
+    mask-position: 50% 50%;
+    mask-repeat: no-repeat;
+    background: currentColor;
+    width: 1em;
+    height: 1em;
+  }
+  // custom icons
+  &[class*="allowapp-sticker1"] {
+    mask-image: url(../assets/images/stickers/sticker1.svg);
+  }
+  &[class*="allowapp-sticker2"] {
+    mask-image: url(../assets/images/stickers/sticker2.svg);
+  }
+  &[class*="allowapp-sticker3"] {
+    mask-image: url(../assets/images/stickers/sticker3.svg);
+  }
+  &[class*="allowapp-sticker4"] {
+    mask-image: url(../assets/images/stickers/sticker4.svg);
+  }
+  &[class*="allowapp-sticker5"] {
+    mask-image: url(../assets/images/stickers/sticker5.svg);
+  }
+  &[class*="allowapp-sticker6"] {
+    mask-image: url(../assets/images/stickers/sticker6.svg);
+  }
+  &[class*="allowapp-sticker7"] {
+    mask-image: url(../assets/images/stickers/sticker7.svg);
+  }
+  &[class*="allowapp-sticker8"] {
+    mask-image: url(../assets/images/stickers/sticker8.svg);
+  }
+  &[class*="allowapp-sticker9"] {
+    mask-image: url(../assets/images/stickers/sticker9.svg);
+  }
+}

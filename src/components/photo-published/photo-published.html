@@ -1,0 +1,30 @@
+<!-- PhotoApproveComponent component -->
+  <ion-card>
+    <ion-card-content class="captacion">
+
+      <img *ngIf="currentImage==null" src={{image?.src}}/>
+
+      <ion-segment class="menu_photo" [(ngModel)]="steps">
+        <ion-segment-button value="basico">
+          Info
+        </ion-segment-button>
+        <ion-segment-button value="solicitar" >
+          Aprobación
+        </ion-segment-button>
+      </ion-segment>
+
+      <div [ngSwitch]="steps" >
+        <ion-list *ngSwitchCase="'basico'" >
+          <photo-info></photo-info>
+        </ion-list>
+        <ion-list *ngSwitchCase="'solicitar'">
+          <div *ngIf="image?.rightholders!=null">
+            <ion-list *ngFor="let holder of image?.rightholders">
+              <photo-approval [rightholder]="holder" [active]="active"></photo-approval>
+            </ion-list>
+          </div>
+        </ion-list>
+      </div>
+    </ion-card-content>
+  </ion-card>
+

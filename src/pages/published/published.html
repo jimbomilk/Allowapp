@@ -1,0 +1,29 @@
+<ion-header>
+  <ion-navbar>
+    <header-logo></header-logo>
+  </ion-navbar>
+
+
+</ion-header>
+
+<ion-content padding>
+  <div padding>
+    <ion-segment [(ngModel)]="source" (ionChange)="sourceChanged($event)">
+      <ion-segment-button value="">
+        Todas
+      </ion-segment-button>
+      <ion-segment-button value="received">
+        Recibidas
+      </ion-segment-button>
+      <ion-segment-button value="sent">
+        Enviadas
+      </ion-segment-button>
+    </ion-segment>
+  </div>
+  <ion-list>
+
+  <ion-item *ngFor="let photo of shown" >
+    <photo-published [image]="photo"></photo-published>
+  </ion-item>
+  </ion-list>
+</ion-content>

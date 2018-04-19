@@ -7,53 +7,66 @@
   <ion-list>
     <ion-list-header>
       <ion-avatar item-start (click)="updateProfileImage()">
-        <img [src]="user.imageUrl ? user.imageUrl : placeholderPicture">
+        <img [src]="user?.imageUrl ? user.imageUrl : placeholderPicture">
       </ion-avatar>
-      <ion-input type="text" class="username" [(ngModel)]="user.name" no-border></ion-input>
-      <ion-label stacked>Propietario</ion-label>
+
     </ion-list-header>
+
   </ion-list>
+  <form [formGroup]="userForm">
   <ion-list no-border>
-    <ion-list-header>
-      General
-    </ion-list-header>
-    <ion-item>
-      <ion-toggle [(ngModel)]="user.enableNotifications" (click)="toggleNotifications()"></ion-toggle>
-      <ion-label class="label"> Habilitar notificaciones </ion-label>
-      <ion-icon name='notifications' item-start></ion-icon>
-    </ion-item>
-    <ion-item>
-      <ion-toggle [(ngModel)]="user.enableBackup" (click)="toggleBackup()"></ion-toggle>
-      <ion-label class="label"> Habilitar salvaguarda </ion-label>
-      <ion-icon name='cloud-upload' item-start></ion-icon>
-    </ion-item>
+
+      <ion-item>
+        <ion-input type="text"  formControlName="name" no-border ></ion-input>
+        <ion-label stacked>Nombre</ion-label>
+      </ion-item>
+      <ion-item>
+        <ion-input type="text"  formControlName="phone" no-border placeholder="(obligatorio)"></ion-input>
+        <ion-label stacked>Teléfono</ion-label>
+      </ion-item>
+      <ion-item>
+        <ion-input type="text"  formControlName="email" no-border></ion-input>
+        <ion-label stacked>Email</ion-label>
+      </ion-item>
+      <ion-item>
+        <ion-toggle formControlName="enableNotifications" (click)="toggleNotifications()"></ion-toggle>
+        <ion-label class="label"> Habilitar notificaciones </ion-label>
+        <ion-icon name='notifications' item-start></ion-icon>
+      </ion-item>
+      <ion-item>
+        <ion-toggle formControlName="enableBackup" (click)="toggleBackup()"></ion-toggle>
+        <ion-label class="label"> Habilitar salvaguarda </ion-label>
+        <ion-icon name='cloud-upload' item-start></ion-icon>
+      </ion-item>
+
   </ion-list>
   <ion-list>
     <ion-list-header>
       Redes sociales
     </ion-list-header>
     <ion-item>
-      <ion-toggle [(ngModel)]="user.enableFacebook" (click)="toggleSocial('facebook')"></ion-toggle>
+      <ion-toggle formControlName="enableFacebook" (click)="toggleSocial('facebook')"></ion-toggle>
       <ion-icon name='logo-facebook' item-start></ion-icon>
       <ion-label>Facebook</ion-label>
     </ion-item>
     <ion-item>
-      <ion-toggle [(ngModel)]="user.enableInstagram" (click)="toggleSocial('instagram')"></ion-toggle>
+      <ion-toggle formControlName="enableInstagram" (click)="toggleSocial('instagram')"></ion-toggle>
       <ion-icon name='logo-instagram' item-start></ion-icon>
       <ion-label>Instagram</ion-label>
     </ion-item>
     <ion-item>
-      <ion-toggle [(ngModel)]="user.enableTwitter" (click)="toggleSocial('twitter')"></ion-toggle>
+      <ion-toggle formControlName="enableTwitter" (click)="toggleSocial('twitter')"></ion-toggle>
       <ion-icon name='logo-twitter' item-start></ion-icon>
       <ion-label>Twitter</ion-label>
     </ion-item>
     <ion-item>
-      <ion-toggle [(ngModel)]="user.enableWeb" (click)="toggleSocial('web')"></ion-toggle>
+      <ion-toggle formControlName="enableWeb" (click)="toggleSocial('web')"></ion-toggle>
       <ion-icon name='globe' item-start></ion-icon>
       <ion-label>Web</ion-label>
     </ion-item>
 
   </ion-list>
+  </form>
   <ion-list>
     <ion-list-header>
       Otros

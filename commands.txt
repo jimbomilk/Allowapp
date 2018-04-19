@@ -1,0 +1,2 @@
+// Ejecutar la app en simulador
+ionic cordova run android --livereload

@@ -42,6 +42,7 @@ import {Camera} from "@ionic-native/camera";
 import { CameraProvider } from '../providers/camera/camera';
 import { DbProvider } from '../providers/db/db';
 import {SQLite} from "@ionic-native/sqlite";
+import {SwingModule} from "angular2-swing";
 
 
 @NgModule({
@@ -74,6 +75,7 @@ import {SQLite} from "@ionic-native/sqlite";
   ],
   imports: [
     BrowserModule,HttpModule,SignaturePadModule,
+    SwingModule,
     IonicModule.forRoot(MyApp),
     PipesModule
   ],

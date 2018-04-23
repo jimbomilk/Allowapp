@@ -1,10 +1,12 @@
 
 <ion-header>
  <ion-navbar>
-    <header-logo text="Captura" instructions="Identifica y envía para su aprobación"></header-logo>
+    <header-logo text="Captura" instructions="Etiqueta y solicita aprobación"></header-logo>
+   <button class="add-photo" ion-button clear icon-only  (click)="presentActionSheet()">
+     <ion-icon name="camera"></ion-icon>
+   </button>
  </ion-navbar>
 </ion-header>
-
 
 <ion-content no-padding>
   <ion-list no-padding>

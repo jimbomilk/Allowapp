@@ -1,29 +1,26 @@
 <ion-header>
   <ion-navbar>
-    <header-logo></header-logo>
+    <header-logo text="Publicación" instructions="Gestiona y revoca permisos"></header-logo>
   </ion-navbar>
-
-
 </ion-header>
 
-<ion-content padding>
-  <div padding>
+<ion-content no-padding padding>
+  <div no-margin no-padding>
     <ion-segment [(ngModel)]="source" (ionChange)="sourceChanged($event)">
-      <ion-segment-button value="">
+      <ion-segment-button value="0">
         Todas
       </ion-segment-button>
-      <ion-segment-button value="received">
+      <ion-segment-button value="30">
         Recibidas
       </ion-segment-button>
-      <ion-segment-button value="sent">
+      <ion-segment-button value="20">
         Enviadas
       </ion-segment-button>
     </ion-segment>
   </div>
   <ion-list>
+    <ion-searchbar [(ngModel)]="searchTerm" [formControl]="searchControl" (ionInput)="onSearchInput()"></ion-searchbar>
 
-  <ion-item *ngFor="let photo of shown" >
-    <photo-published [image]="photo"></photo-published>
-  </ion-item>
+    <photo-item [image]="photo" *ngFor="let photo of shown" [showPeople]="bySource" ></photo-item>
   </ion-list>
 </ion-content>

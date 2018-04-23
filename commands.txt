@@ -1,2 +1,16 @@
 // Ejecutar la app en simulador
 ionic cordova run android --livereload
+//En el device
+ionic cordova run android --device
+
+//ERROR:
+Execution failed for task ':transformClassesWithDexForDebug'.
+> com.android.build.api.transform.TransformException: com.android.ide.common.process.ProcessException: java.util.concurrent.ExecutionException: com.android.dex.DexException: Multiple d
+ex files define Lorg/apache/cordova/BuildHelper;
+
+SOLUCION:
+1. Execute: cordova plugin rm cordova-plugin-compat --force
+2. Execute: cordova plugin add cordova-plugin-compat@1.2
+3. Change : config.xml in your project folder use "6.2.3" not "^6.2.3",
+then delete the platforms/android folder, re-run cordova prepare android, and cordova build android
+

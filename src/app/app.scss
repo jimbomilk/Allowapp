@@ -144,4 +144,10 @@ ion-icon {
   &[class*="allowapp-sticker9"] {
     mask-image: url(../assets/images/stickers/sticker9.svg);
   }
+
+
+}
+
+.no-scroll .scroll-content{
+  overflow: hidden;
 }

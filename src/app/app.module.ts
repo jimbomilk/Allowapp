@@ -38,11 +38,16 @@ import {PipesModule} from "../pipes/pipes.module";
 import {FlashCardComponent} from "../components/flash-card/flash-card";
 import { AlertProvider } from '../providers/alert/alert';
 import { ToastProvider } from '../providers/toast/toast';
-import {Camera} from "@ionic-native/camera";
-import { CameraProvider } from '../providers/camera/camera';
 import { DbProvider } from '../providers/db/db';
 import {SQLite} from "@ionic-native/sqlite";
 import {SwingModule} from "angular2-swing";
+import { File } from '@ionic-native/file';
+import { FilePath } from '@ionic-native/file-path';
+import { Camera } from '@ionic-native/camera';
+import {CrearContactoPage} from "../pages/crear-contacto/crear-contacto";
+import {ContactosPage} from "../pages/contactos/contactos";
+import {Contacts} from "@ionic-native/contacts";
+import {SearchContactoComponent} from "../components/blocks/search-contacto/search-contacto";
 
 
 @NgModule({
@@ -56,6 +61,8 @@ import {SwingModule} from "angular2-swing";
     PhotoSendPage,
     PersonDetailsPage,
     PhotoDetailsPage,
+    CrearContactoPage,
+    ContactosPage,
     PhotoRequestComponent,
     PhotoApproveComponent,
     PhotoPublishedComponent,
@@ -71,7 +78,8 @@ import {SwingModule} from "angular2-swing";
     TutorDetailsComponent,
     SignatureComponent,
     FlashCardComponent,
-    AbsoluteDragDirective,
+    SearchContactoComponent,
+    AbsoluteDragDirective
   ],
   imports: [
     BrowserModule,HttpModule,SignaturePadModule,
@@ -89,19 +97,23 @@ import {SwingModule} from "angular2-swing";
     TabsPage,
     PhotoSendPage,
     PersonDetailsPage,
-    PhotoDetailsPage
+    PhotoDetailsPage,
+    CrearContactoPage,
+    ContactosPage
   ],
   providers: [
     StatusBar,
     SplashScreen,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
+    SQLite,
+    DbProvider,
     DataProvider,
     AlertProvider,
     ToastProvider,
+    File,
     Camera,
-    CameraProvider,
-    SQLite,
-    DbProvider
+    FilePath,
+    Contacts
   ]
 })
 export class AppModule {}

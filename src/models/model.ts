@@ -9,6 +9,7 @@ export class superModel{
   unique = " UNIQUE";
   values : any [];
 
+
   constructor(table,cols,orderby){
 
     this.table = table;
@@ -17,18 +18,30 @@ export class superModel{
     this.values = [];
   }
 
-  getSqlCols(){
-    var ret="(rowid INTEGER PRIMARY KEY";
+  getSqlCols(insert=false){
+    let i=0;let ret=" (";
     for(var prop in this.cols){
-      ret += ","
-      ret += prop;
-      ret += " ";
-      if (this.cols[prop].charAt(0)=='*') {
-        ret += this.cols[prop].substring(1, this.cols[prop].length);
-        ret += this.unique;
+      if(i++>0){
+       ret += ",";
       }
-      else
-        ret += this.cols[prop];
+      ret += prop;
+      if (!insert) {
+        ret += " ";
+        if (prop == "rowid") {
+          ret += this.cols[prop];
+          ret += " PRIMARY KEY AUTOINCREMENT"
+        }
+        else if (prop == "timestamp") {
+          ret += this.cols[prop];
+          ret += " DEFAULT CURRENT_TIMESTAMP"
+        }
+        else if (this.cols[prop].charAt(0) == '*') {
+          ret += this.cols[prop].substring(1, this.cols[prop].length);
+          ret += this.unique;
+        }
+        else
+          ret += this.cols[prop];
+      }
 
     }
     ret += ")";
@@ -47,13 +60,17 @@ export class superModel{
     return ret;
   }
 
-  getSqlColValues(){
+  getSqlColValues(values){
     let ret="(";
     let i=0;
     for(let prop in this.cols){
+
       if (i++>0)
-        ret += ","
-      ret += "?";
+        ret += ",";
+      if(prop=='rowid' && !values[prop])
+        ret += 'NULL';
+      else
+        ret += "?";
     }
     ret += ")";
     return ret;
@@ -82,33 +99,67 @@ export class superModel{
           this.values.push(values[prop]);
         }
         else {
-          if (this.cols[prop] == 'TEXT' || this.cols[prop] == '*TEXT')
-            this.values.push('');
-          else if (this.cols[prop] == 'BOOLEAN' || this.cols[prop] == '*BOOLEAN')
+          if (prop == 'rowid') {
+            // no se pone nada
+          }
+          else if (this.cols[prop] == 'TEXT' || this.cols[prop] == '*TEXT') {
+            this.values.push("''");
+            values[prop] = "";
+          }
+          else if (this.cols[prop] == 'BOOLEAN' || this.cols[prop] == '*BOOLEAN') {
             this.values.push(false);
-          else if (this.cols[prop] == 'NUMBER' || this.cols[prop] == '*NUMBER')
-            this.values.push(-1);
-          else if (this.cols[prop] == 'DATE' || this.cols[prop] == '*DATE')
+            values[prop] = false;
+          }
+          else if (this.cols[prop] == 'INTEGER' || this.cols[prop] == '*INTEGER') {
             this.values.push(0);
-          else if (this.cols[prop] == 'DATETIME' || this.cols[prop] == '*DATETIME')
+            values[prop] = 0;
+          }
+          else if (this.cols[prop] == 'DATE' || this.cols[prop] == '*DATE' || this.cols[prop] == 'DATETIME' || this.cols[prop] == '*DATETIME') {
             this.values.push(0);
+            values[prop] = 0;
+          }
+          else if (this.cols[prop] == 'TIMESTAMP' || this.cols[prop] == '*TIMESTAMP') {
+            this.values.push(this.currentTimestamp());
+            values[prop] =  this.currentTimestamp() ;
+          }
         }
       }else{
         // Extra has all the data because is gonna be very useful to keep the integrity of the data and to make backups!
         this.values.push(JSON.stringify(values));
       }
     }
+
+
+
     return this.values;
 
   }
 
+  dateFromUTC( dateAsString, ymdDelimiter ) {
+    var pattern = new RegExp( "(\\d{4})" + ymdDelimiter + "(\\d{2})" + ymdDelimiter + "(\\d{2}) (\\d{2}):(\\d{2}):(\\d{2})" );
+    var parts = dateAsString.match( pattern );
+    return new Date( Date.UTC(
+      parseInt( parts[1] )
+      , parseInt( parts[2], 10 ) - 1
+      , parseInt( parts[3], 10 )
+      , parseInt( parts[4], 10 )
+      , parseInt( parts[5], 10 )
+      , parseInt( parts[6], 10 )
+      , 0
+    ));
+  }
+
+  currentTimestamp(){
+    var date = new Date();
+    return date.toISOString();
+  }
 
 }
 
 export class logModel extends superModel
 {
   constructor(){
-    let cols = {action:'TEXT',timestamp:'DATETIME',extra:'TEXT'};
+    let cols = {rowid:'INTEGER',photoId:'INTEGER',action:'TEXT',timestamp:'TIMESTAMP',extra:'TEXT'};
     let orderby = "ORDER BY timestamp DESC";
     super('logs',cols,orderby);
   }
@@ -117,34 +168,38 @@ export class logModel extends superModel
 export class userModel extends superModel
 {
   constructor(){
-    let cols = {phone:'*TEXT',email:'TEXT',extra:'TEXT'};
+    let cols = {rowid:'INTEGER',name:'TEXT',phone:'TEXT',email:'TEXT',timestamp:'TIMESTAMP',extra:'TEXT'};
     let orderby = "ORDER BY phone DESC";
     super('users',cols,orderby);
-  }
-}
-
-export class socialNetworkModel extends superModel
-{
-  constructor(){
-    let cols = {name:"TEXT",picto:"TEXT",link:"TEXT",extra:'TEXT'}
-    let orderby = "ORDER BY name DESC";
-    super('social_networks',cols,orderby);
   }
 }
 
 export class photoModel extends superModel
 {
   constructor(){
-    let cols = {owner:"NUMBER",timestamp:"DATETIME",source:"TEXT",extra:'TEXT',status:"NUMBER",statusTime:"DATETIME"}
+    // status : 0  - creada
+    //          10 - enviada
+    //          20 - recibida
+    let cols = {rowid:'INTEGER',owner:"TEXT",timestamp:"TIMESTAMP",status:"INTEGER",statusTime:"TIMESTAMP",extra:'TEXT'}
     let orderby = "ORDER BY timestamp DESC";
     super('photos',cols,orderby);
+  }
+}
+
+/*
+export class socialNetworkModel extends superModel
+{
+  constructor(){
+    let cols = {rowid:'INTEGER',name:"TEXT",picto:"TEXT",link:"TEXT",extra:'TEXT'}
+    let orderby = "ORDER BY name DESC";
+    super('social_networks',cols,orderby);
   }
 }
 
 export class peoplePhotoModel extends superModel
 {
   constructor(){
-    let cols = {photoId:"NUMBER",personId:"NUMBER",extra:'TEXT'}
+    let cols = {rowid:'INTEGER',photoId:"INTEGER",personId:"INTEGER",extra:'TEXT',timestamp:'TIMESTAMP'}
     let orderby = "ORDER BY photoId DESC";
     super('people_photo',cols,orderby);
   }
@@ -153,7 +208,7 @@ export class peoplePhotoModel extends superModel
 export class rightHolderModel extends superModel
 {
   constructor(){
-    let cols = {personId:"NUMBER",rightHolderId:"NUMBER",relation:"TEXT",extra:'TEXT'}
+    let cols = {rowid:'INTEGER',personId:"INTEGER",phone:"INTEGER*",email:"TEXT",relation:"TEXT",extra:'TEXT'}
     let orderby = "ORDER BY rightHolderId DESC";
     super('rightholders',cols,orderby);
   }
@@ -162,7 +217,7 @@ export class rightHolderModel extends superModel
 export class personModel extends superModel
 {
   constructor(){
-    let cols = {id:"NUMBER",name:"TEXT",phone:"NUMBER",email:"TEXT",extra:'TEXT'}
+    let cols = {rowid:'INTEGER',name:"TEXT",minor:"BOOLEAN",extra:'TEXT'}
     let orderby = "ORDER BY name,phone,email DESC";
     super('persons',cols,orderby);
   }
@@ -171,7 +226,7 @@ export class personModel extends superModel
 export class photoRightModel extends superModel
 {
   constructor(){
-    let cols = {photoId:"NUMBER",rightHolderId:"NUMBER",status:"NUMBER",timestamp:"DATE",extra:'TEXT'}
+    let cols = {rowid:'INTEGER',photoId:"INTEGER",rightHolderId:"INTEGER",status:"INTEGER",timestamp:"TIMESTAMP",extra:'TEXT'}
     let orderby = "ORDER BY rightHolderId,status DESC";
     super('photo_rights',cols,orderby);
   }
@@ -180,8 +235,9 @@ export class photoRightModel extends superModel
 export class photoShare extends superModel
 {
   constructor(){
-    let cols = {photoId:"NUMBER",socialNetworkId:"NUMBER",timestamp:"DATE",socialLink:"TEXT",extra:'TEXT'}
+    let cols = {rowid:'INTEGER',photoId:"INTEGER",socialNetworkId:"INTEGER",timestamp:"TIMESTAMP",socialLink:"TEXT",extra:'TEXT'}
     let orderby = "ORDER BY timestamp DESC";
     super('photo_shares',cols,orderby);
   }
 }
+*/

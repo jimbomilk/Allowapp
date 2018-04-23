@@ -2,10 +2,11 @@ import {Component} from '@angular/core';
 import {AlertProvider} from "../../providers/alert/alert";
 import {Camera} from "@ionic-native/camera";
 import {ToastProvider} from "../../providers/toast/toast";
-import {DbProvider} from "../../providers/db/db";
 import {userModel} from "../../models/model";
 import {FormBuilder, Validators} from "@angular/forms";
 import {Events} from "ionic-angular";
+import {DataProvider} from "../../providers/data/data";
+import {DbProvider} from "../../providers/db/db";
 
 @Component({
   selector: 'profile-contact',
@@ -17,6 +18,7 @@ export class ProfilePage {
   placeholderPicture = 'https://api.adorable.io/avatars/50/abott@adorable.png';
   user : any;
   userForm:any;
+  profile : any;
 
 
 
@@ -24,20 +26,21 @@ export class ProfilePage {
     public alertService: AlertProvider,
     public toastCtrl: ToastProvider,
     public camera: Camera,
-    public db: DbProvider, public formBuilder: FormBuilder,public events:Events
+    public data: DataProvider, public db:DbProvider, public formBuilder: FormBuilder,public events:Events
   ) {
 
+    let re =  /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
     this.userForm = formBuilder.group({
-      name: ['', Validators.compose([Validators.maxLength(20), Validators.pattern('[a-zA-Z ]*')])],
+      name: ['', Validators.compose([Validators.maxLength(20), Validators.pattern('[a-zA-Z]*')])],
       phone: ['', Validators.compose([Validators.maxLength(20), Validators.pattern('[0-9]*'), Validators.required])],
-      email: ['', Validators.compose([Validators.pattern('/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/')])],
-      imageUrl: [''],
-      enableNotifications : [true],
-      enableBackup : [true],
-      enableFacebook: [false],
-      enableInstagram: [false],
-      enableTwitter: [false],
-      enableWeb: [false]
+      email: ['', Validators.compose([Validators.pattern(re)])],
+      notifications : [false],
+      backup : [false],
+      facebook: [false],
+      instagram: [false],
+      twitter: [false],
+      web: [false]
     });
 
 
@@ -45,7 +48,7 @@ export class ProfilePage {
   }
 
   toggleNotifications() {
-    this.user.enableNotifications = !this.user.enableNotifications;
+    this.user.value.notifications = !this.user.value.notifications;
     if (this.user.enableNotifications) {
       this.toastCtrl.create('Notificaciones habilitadas.');
     } else {
@@ -54,7 +57,7 @@ export class ProfilePage {
   }
 
   toggleBackup() {
-    this.user.enableBackup != this.user.enableBackup;
+    this.user.value.backup != this.user.value.backup;
     if (this.user.enableBackup) {
       this.toastCtrl.create('Backup habilitado.');
     } else {
@@ -63,12 +66,10 @@ export class ProfilePage {
   }
 
   toggleSocial(network) {
+    this.user.value[network] = !this.user.value[network]
     this.toastCtrl.create('Configuración de '+network+ ' modificada');
   }
 
-  updateImage(value) {
-    this.profilePicture = 'data:image/jpeg;base64,' + value.val();
-  }
 
   updateProfileImage() {
     this.camera.getPicture({
@@ -93,13 +94,14 @@ export class ProfilePage {
   }
 
   ionViewDidLoad(){
-    this.db.getData(new userModel()).then( (val) =>{
-
-      this.userForm = JSON.parse(val[0].extra);
-
+    this.data.getProfile().then ( (val) =>{
+      this.profile = val;
+      for (let prop in this.profile.extra) {
+        if (this.userForm.controls[prop])
+          this.userForm.controls[prop].setValue(this.profile.extra[prop]);
+      }
     }).catch(e=>{
       console.log("Error al cargar datos de usuario.");
-      this.toastCtrl.create('Error: no existe base de datos.');
     });
 
   }
@@ -108,11 +110,15 @@ export class ProfilePage {
 
   ionViewWillLeave() {
     //Creamos el modelo
-    var user = new userModel;
+
     if (this.userForm.valid) {
+      this.profile.name = this.userForm.value.name;
+      this.profile.phone = this.userForm.value.phone;
+      this.profile.email = this.userForm.value.email;
+      this.profile.extra = this.userForm.value;
 
       //Guardar datos
-      this.db.saveData(user, this.user).catch(e => {
+      this.db.saveData(new userModel, this.profile).catch(e => {
         this.toastCtrl.create('Error de base de datos.');
         this.events.publish('badge4:updated', "!");
       });

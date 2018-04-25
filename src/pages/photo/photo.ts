@@ -1,9 +1,17 @@
-import { Component } from '@angular/core';
-import {ActionSheetController, NavController, Platform, ToastController} from 'ionic-angular';
+import {Component, ViewChild} from '@angular/core';
+import {
+  ActionSheetController, Events, ModalController, NavController, Platform, PopoverController,
+  ToastController
+} from 'ionic-angular';
 import {DataProvider} from "../../providers/data/data";
 import {Camera} from '@ionic-native/camera';
 import {File} from "@ionic-native/file";
 import {FilePath} from "@ionic-native/file-path";
+import {photoModel} from "../../models/model";
+import * as Constants from '../../models/constants';
+import {PhotoSendPage} from "../photo-send/photo-send";
+import {ContactosPage} from "../contactos/contactos";
+import {DbProvider} from "../../providers/db/db";
 declare var cordova: any;
 
 @Component({
@@ -11,16 +19,56 @@ declare var cordova: any;
   templateUrl: 'photo.html'
 })
 export class PhotoPage {
+  @ViewChild('photo-item') photoItem;
   lastImage: string = null;
-  public photos : any;
   public profile : any;
   public base64Image : string;
+  public status_photo = Constants.STATUS_CREADA;
   capturas: any;
   constructor(public navCtrl: NavController,private data: DataProvider,
               private camera: Camera,
               private file: File, private filePath: FilePath,
               private platform: Platform, public actionSheetCtrl: ActionSheetController,
-              public toastCtrl: ToastController) {
+              public toastCtrl: ToastController,
+              public saveCtrl: PopoverController,
+              private modalCtrl:ModalController,
+              private db:DbProvider,
+              public events: Events)
+  {
+    events.subscribe('photo:enviar', (image) => {
+      this.photoAction(image);
+    });
+
+    events.subscribe('photo:newperson', (image,item) => {
+      this.addPerson2Image(image,item)
+    });
+  }
+
+  addPerson2Image(image,item){
+    console.log('Añadir persona');
+    let person = {name:"",phone:"",email:"",minor:false,sticker:item};
+    image.extra.people.unshift(person);
+
+    let contact = this.modalCtrl.create(ContactosPage);
+    contact.onDidDismiss(data => {
+      console.log({dataOnDidDismiss:data});
+      if(data.estado){
+        console.log(data)
+        if (!data.minor) {
+          person.name = data.contacto.displayName;
+          person.phone = data.contacto.phoneNumbers[0].value;
+        }else{
+          person.name = 'Menor de edad sin teléfono'
+          person.phone = "";
+        }
+        person.minor = data.minor;
+        this.data.save(new photoModel(),image).then( res =>{
+          this.presentToast(person.name + ' añadida');
+        });
+      }
+    });
+    contact.present();
+
   }
 
   ionViewDidLoad()
@@ -31,7 +79,28 @@ export class PhotoPage {
     this.data.getCapturadas().then( (res)=> {
       this.capturas = res;
     });
-    this.photos = [];
+
+
+  }
+
+  photoAction(image){
+    this.data.save(new photoModel(),image).then(res=>{
+      let sendPage = this.saveCtrl.create(PhotoSendPage);
+      sendPage.present();
+    });
+
+  }
+
+  public restore(){
+    this.db.connect()
+
+     .then(() => this.db.dropTables())
+     .then(() => this.db.createTables())
+     .then(() => this.data.loadDataTest())
+
+      .catch( e=> {
+        console.log("Error",e);
+      })
 
   }
 
@@ -127,4 +196,18 @@ export class PhotoPage {
       return cordova.file.dataDirectory + img;
     }
   }
+
+  ionViewDidLeave() {
+    //Creamos el modelo
+    let err= false;
+    for (let photo in this.capturas){
+      this.data.save(new photoModel(),this.capturas[photo]).catch( e => {
+        err = true;
+      });
+    }
+    if (err)
+      this.toastCtrl.create('Error de base de datos.');
+  }
+
+
 }

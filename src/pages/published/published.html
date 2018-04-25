@@ -21,6 +21,6 @@
   <ion-list>
     <ion-searchbar [(ngModel)]="searchTerm" [formControl]="searchControl" (ionInput)="onSearchInput()"></ion-searchbar>
 
-    <photo-item [image]="photo" *ngFor="let photo of shown" [showPeople]="bySource" ></photo-item>
+    <photo-item [image]="photo" *ngFor="let photo of shown" [showPeople]="showPeople" ></photo-item>
   </ion-list>
 </ion-content>

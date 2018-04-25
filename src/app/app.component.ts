@@ -20,10 +20,11 @@ export class MyApp {
       statusBar.styleDefault();
       splashScreen.hide();
       db.connect()
-        /*
+/*
         .then(() => db.dropTables())
         .then(() => db.createTables())
         .then(() => data.loadDataTest())*/
+
         .catch( e=> {
           console.log("Error",e);
         })

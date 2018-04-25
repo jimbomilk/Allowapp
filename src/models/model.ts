@@ -123,11 +123,12 @@ export class superModel{
             values[prop] =  this.currentTimestamp() ;
           }
         }
-      }else{
-        // Extra has all the data because is gonna be very useful to keep the integrity of the data and to make backups!
-        this.values.push(JSON.stringify(values));
       }
     }
+    if (values.extra)
+      this.values.push(JSON.stringify(values.extra));
+    else
+      this.values.push(JSON.stringify(values));
 
 
 

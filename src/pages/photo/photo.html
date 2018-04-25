@@ -2,15 +2,20 @@
 <ion-header>
  <ion-navbar>
     <header-logo text="Captura" instructions="Etiqueta y solicita aprobación"></header-logo>
-   <button class="add-photo" ion-button clear icon-only  (click)="presentActionSheet()">
-     <ion-icon name="camera"></ion-icon>
-   </button>
+   <ion-buttons end >
+     <button ion-button clear icon-only  (click)="presentActionSheet()">
+       <ion-icon style="color:white" name="camera"></ion-icon>
+     </button>
+     <button ion-button clear icon-only  (click)="restore()">
+       <ion-icon style="color:white" name="cloud-download"></ion-icon>
+     </button>
+   </ion-buttons>
  </ion-navbar>
 </ion-header>
 
 <ion-content no-padding>
   <ion-list no-padding>
-    <photo-request *ngFor="let photo of capturas" [image]="photo"></photo-request>
+    <photo-item *ngFor="let photo of capturas" [showPeople]="true" [image]="photo" [action]="'enviar'" [stickers]="true"></photo-item>
   </ion-list>
 
 </ion-content>

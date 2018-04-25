@@ -15,6 +15,7 @@ export class PublishedPage {
   searchControl: FormControl;
   searching: any = false;
   filterItem : any;
+  showPeople:any;
 
   published : any[];
   shown : any[];
@@ -25,6 +26,7 @@ export class PublishedPage {
     this.published = new Array;
     this.shown = new Array;
     this.bySource = false;
+    this.showPeople = false;
   }
 
   ionViewDidLoad()
@@ -63,6 +65,7 @@ export class PublishedPage {
     if (value._value == Constants.STATUS_ENVIADA) {
       this.bySource = true;
       this.filterItem = 'byPeople';
+      this.showPeople = true;
     }
     else {
       this.bySource = false;

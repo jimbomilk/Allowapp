@@ -1,9 +1,4 @@
 import { Component } from '@angular/core';
-
-import { PhotoPage } from '../photo/photo';
-import { ProfilePage } from '../profile/profile';
-import { PendingPage } from '../pending/pending';
-import { PublishedPage } from '../published/published';
 import {Events} from "ionic-angular";
 import {AlertProvider} from "../../providers/alert/alert";
 
@@ -12,10 +7,10 @@ import {AlertProvider} from "../../providers/alert/alert";
 })
 export class TabsPage {
 
-  tab1Root = PhotoPage;
-  tab2Root = PendingPage;
-  tab3Root = PublishedPage;
-  tab4Root = ProfilePage;
+  tab1Root = 'PhotoPage';
+  tab2Root = 'PendingPage';
+  tab3Root = 'PublishedPage';
+  tab4Root = 'ProfilePage';
 
   public tabBadge1: string = "";
   public tabBadge2: string = "";

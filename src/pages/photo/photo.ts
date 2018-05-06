@@ -1,19 +1,18 @@
 import {Component, ViewChild} from '@angular/core';
 import {
-  ActionSheetController, Events, ModalController, NavController, Platform, PopoverController,
+  ActionSheetController, Events, IonicPage, ModalController, NavController, Platform,
   ToastController
 } from 'ionic-angular';
 import {DataProvider} from "../../providers/data/data";
 import {Camera} from '@ionic-native/camera';
 import {File} from "@ionic-native/file";
 import {FilePath} from "@ionic-native/file-path";
-import {photoModel} from "../../models/model";
+import {Photo, photoModel} from "../../models/model";
 import * as Constants from '../../models/constants';
-import {PhotoSendPage} from "../photo-send/photo-send";
-import {ContactosPage} from "../contactos/contactos";
 import {DbProvider} from "../../providers/db/db";
 declare var cordova: any;
 
+@IonicPage()
 @Component({
   selector: 'page-photo',
   templateUrl: 'photo.html'
@@ -30,7 +29,6 @@ export class PhotoPage {
               private file: File, private filePath: FilePath,
               private platform: Platform, public actionSheetCtrl: ActionSheetController,
               public toastCtrl: ToastController,
-              public saveCtrl: PopoverController,
               private modalCtrl:ModalController,
               private db:DbProvider,
               public events: Events)
@@ -47,9 +45,9 @@ export class PhotoPage {
   addPerson2Image(image,item){
     console.log('Añadir persona');
     let person = {name:"",phone:"",email:"",minor:false,sticker:item};
-    image.extra.people.unshift(person);
+    image.people.unshift(person);
 
-    let contact = this.modalCtrl.create(ContactosPage);
+    let contact = this.modalCtrl.create('ContactosPage');
     contact.onDidDismiss(data => {
       console.log({dataOnDidDismiss:data});
       if(data.estado){
@@ -73,22 +71,28 @@ export class PhotoPage {
 
   ionViewDidLoad()
   {
-    this.data.getProfile().then ( (p) =>{
-      this.profile = p;
+    this.platform.ready().then(() => {
+      // Okay, so the platform is ready and our plugins are available.
+      // Here you can do any higher level native things you might need.
+      this.data.getProfile()
+        .then((p) => this.profile = p)
+        .catch(e=>{
+          console.log("Error al cargar profile.")
+        })
+        .then(()  => this.data.loadPhotos())
+        .catch(e=>{
+          console.log("Error al cargar fotos.")
+        })
+        .then((r) => this.capturas = this.data.getCapturadas())
+        .catch(e=>{
+          console.log("Error al cargar datos.");
+        })
     });
-    this.data.getCapturadas().then( (res)=> {
-      this.capturas = res;
-    });
-
 
   }
 
   photoAction(image){
-    this.data.save(new photoModel(),image).then(res=>{
-      let sendPage = this.saveCtrl.create(PhotoSendPage);
-      sendPage.present();
-    });
-
+    this.navCtrl.push('PhotoSendPage',{photo:image,user:this.data.user});
   }
 
   public restore(){
@@ -171,7 +175,9 @@ export class PhotoPage {
     this.file.copyFile(namePath, currentName, cordova.file.dataDirectory, newFileName).then(success => {
       this.lastImage = newFileName;
       // Creamos un objeto photo y lo insertamos en bbdd
-      let photo = {src: newFileName,owner: this.profile.phone ,people : [], sharing : this.profile.extra.sharing};
+      //let entradalog = "Imagen creada el: " + new Date() + " por " + this.profile.phone;
+
+      let photo = new Photo("Nueva imagen",newFileName,this.profile.phone,Constants.STATUS_CREADA);
       this.capturas.push(photo);
 
     }, error => {
@@ -198,15 +204,7 @@ export class PhotoPage {
   }
 
   ionViewDidLeave() {
-    //Creamos el modelo
-    let err= false;
-    for (let photo in this.capturas){
-      this.data.save(new photoModel(),this.capturas[photo]).catch( e => {
-        err = true;
-      });
-    }
-    if (err)
-      this.toastCtrl.create('Error de base de datos.');
+
   }
 
 

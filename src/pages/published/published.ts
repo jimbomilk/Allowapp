@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
-import { NavController } from 'ionic-angular';
+import {IonicPage, NavController} from 'ionic-angular';
 import {DataProvider} from "../../providers/data/data";
 import * as Constants from '../../models/constants';
 import {FormControl} from "@angular/forms";
 import 'rxjs/add/operator/debounceTime';
-
+@IonicPage()
 @Component({
   selector: 'page-published',
   templateUrl: 'published.html',
@@ -27,14 +27,13 @@ export class PublishedPage {
     this.shown = new Array;
     this.bySource = false;
     this.showPeople = false;
+    this.searchControl = new FormControl();
+
   }
 
   ionViewDidLoad()
   {
-    this.data.getPublished().then( (res) =>{
-      this.published = res;
-      this.shown = this.published;
-    })
+    this.shown = this.data.photos;
 
     this.searchControl.valueChanges.debounceTime(700).subscribe(search => {
       this.searching = false;
@@ -52,7 +51,7 @@ export class PublishedPage {
 
     return this.shown.filter((item) => {
       if (this.filterItem == 'byPeople') {
-        return item.extra.people.filter((person) => {
+        return item.people.filter((person) => {
           person.name.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1;
         })
       }
@@ -61,17 +60,25 @@ export class PublishedPage {
 
   }
 
+  onSearchInput(){
+    this.searching = true;
+  }
+
   sourceChanged(value){
     if (value._value == Constants.STATUS_ENVIADA) {
       this.bySource = true;
       this.filterItem = 'byPeople';
       this.showPeople = true;
+      this.shown = this.data.getEnviadas();
+    }else if (value._value == Constants.STATUS_RECIBIDA) {
+      this.shown = this.data.getRecibidas();
     }
     else {
       this.bySource = false;
       this.filterItem = 'byOwner'
+      this.shown = this.data.photos;
     }
-    this.shown =  this.data.filterBySource(this.published,value._value);
+
   }
 
 

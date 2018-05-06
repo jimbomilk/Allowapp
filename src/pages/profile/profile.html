@@ -5,24 +5,43 @@
 </ion-header>
 <ion-content>
   <form [formGroup]="userForm">
-  <ion-list no-border>
-    <ion-list-header>
-      Datos personales
+  <ion-list no-border no-margin>
+    <ion-list-header no-margin>
+      <ion-item no-padding no-margin>
+        Datos personales
+
+        <button ion-button outline  (click)="save()" item-end icon-left>
+          <ion-icon name='log-in' ></ion-icon>
+          Guardar
+        </button>
+      </ion-item>
     </ion-list-header>
       <ion-item>
         <ion-input type="text"  formControlName="name" no-border ></ion-input>
         <ion-label stacked>Nombre</ion-label>
+        <ion-icon item-end name='person' ></ion-icon>
       </ion-item>
       <ion-item>
         <ion-input type="text"  formControlName="phone" no-border placeholder="(obligatorio)"></ion-input>
         <ion-label stacked>Teléfono</ion-label>
+        <ion-icon item-end name='call' ></ion-icon>
       </ion-item>
       <ion-item>
         <ion-input type="text"  formControlName="email" no-border></ion-input>
         <ion-label stacked>Email</ion-label>
+        <ion-icon item-end name='mail' ></ion-icon>
       </ion-item>
+    <ion-item>
+      <ion-input type="password"  formControlName="password" no-border></ion-input>
+      <ion-label stacked>Password</ion-label>
+      <ion-icon item-end name='lock' ></ion-icon>
+    </ion-item>
+
     <ion-list-header>
-      General
+      <ion-item no-padding no-margin>
+        General
+
+      </ion-item>
     </ion-list-header>
       <ion-item>
         <ion-toggle formControlName="notifications" (click)="toggleNotifications()"></ion-toggle>
@@ -35,10 +54,11 @@
         <ion-icon name='cloud-upload' item-start></ion-icon>
       </ion-item>
 
-  </ion-list>
-  <ion-list>
     <ion-list-header>
-      Redes sociales
+      <ion-item no-padding>
+        Redes Sociales
+
+      </ion-item>
     </ion-list-header>
     <ion-item>
       <ion-toggle formControlName="facebook" (click)="toggleSocial('facebook')"></ion-toggle>

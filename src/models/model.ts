@@ -1,6 +1,4 @@
-/**
- * Created by jimbomilk on 12/04/2018.
- */
+/*************************************** DDBB MODEL *********************************/
 export class superModel{
 
   table : any;
@@ -67,7 +65,7 @@ export class superModel{
 
       if (i++>0)
         ret += ",";
-      if(prop=='rowid' && !values[prop])
+      if(prop == 'rowid' && values[prop] == -1)
         ret += 'NULL';
       else
         ret += "?";
@@ -76,64 +74,22 @@ export class superModel{
     return ret;
   }
 
-  setUpdateValues(values){
-    let ret = "";
-    let i=0;
-    for (var prop in  this.cols) {
-      if (i++>0)
-        ret += ","
-      ret += prop;
-      ret += "=";
-      ret += values[prop];
-    }
-  }
-
   // values  : {id:'2342423',name:'pepe',email:'qwerwer@ee.com',phone:'234234234',backup:true,twitter:true}
   // output : ['2342423','pepe','qwerwer@ee.com',...]
   setSqlValues(values) {
     this.values = [];
     // Primero guardamos los indices
     for (var prop in  this.cols) {
-      if (prop != 'extra') {
-        if (values[prop]) {
-          this.values.push(values[prop]);
-        }
-        else {
-          if (prop == 'rowid') {
-            // no se pone nada
-          }
-          else if (this.cols[prop] == 'TEXT' || this.cols[prop] == '*TEXT') {
-            this.values.push("''");
-            values[prop] = "";
-          }
-          else if (this.cols[prop] == 'BOOLEAN' || this.cols[prop] == '*BOOLEAN') {
-            this.values.push(false);
-            values[prop] = false;
-          }
-          else if (this.cols[prop] == 'INTEGER' || this.cols[prop] == '*INTEGER') {
-            this.values.push(0);
-            values[prop] = 0;
-          }
-          else if (this.cols[prop] == 'DATE' || this.cols[prop] == '*DATE' || this.cols[prop] == 'DATETIME' || this.cols[prop] == '*DATETIME') {
-            this.values.push(0);
-            values[prop] = 0;
-          }
-          else if (this.cols[prop] == 'TIMESTAMP' || this.cols[prop] == '*TIMESTAMP') {
-            this.values.push(this.currentTimestamp());
-            values[prop] =  this.currentTimestamp() ;
-          }
-        }
+      if (prop == 'data') {
+        this.values.push(JSON.stringify(values));
+      }else if (prop == 'rowid' && values.rowid != -1) {
+          this.values.push(values.rowid);
+      }else if (this.cols[prop] == 'TIMESTAMP') {
+        this.values.push(this.currentTimestamp());
       }
+
     }
-    if (values.extra)
-      this.values.push(JSON.stringify(values.extra));
-    else
-      this.values.push(JSON.stringify(values));
-
-
-
     return this.values;
-
   }
 
   dateFromUTC( dateAsString, ymdDelimiter ) {
@@ -157,20 +113,13 @@ export class superModel{
 
 }
 
-export class logModel extends superModel
-{
-  constructor(){
-    let cols = {rowid:'INTEGER',photoId:'INTEGER',action:'TEXT',timestamp:'TIMESTAMP',extra:'TEXT'};
-    let orderby = "ORDER BY timestamp DESC";
-    super('logs',cols,orderby);
-  }
-}
+
 
 export class userModel extends superModel
 {
   constructor(){
-    let cols = {rowid:'INTEGER',name:'TEXT',phone:'TEXT',email:'TEXT',timestamp:'TIMESTAMP',extra:'TEXT'};
-    let orderby = "ORDER BY phone DESC";
+    let cols = {rowid:'INTEGER',data:'TEXT',timestamp:'TIMESTAMP'};
+    let orderby = "ORDER BY timestamp DESC";
     super('users',cols,orderby);
   }
 }
@@ -181,12 +130,139 @@ export class photoModel extends superModel
     // status : 0  - creada
     //          10 - enviada
     //          20 - recibida
-    let cols = {rowid:'INTEGER',owner:"TEXT",timestamp:"TIMESTAMP",status:"INTEGER",statusTime:"TIMESTAMP",extra:'TEXT'}
+    let cols = {rowid:'INTEGER',data:"TEXT",timestamp:"TIMESTAMP"}
     let orderby = "ORDER BY timestamp DESC";
     super('photos',cols,orderby);
   }
 }
 
+
+/*********************************   DATA MODEL *********************************/
+
+export class Sharing{
+  facebook:boolean;
+  instagram:boolean;
+  twitter:boolean;
+  web:boolean;
+  constructor(facebook,instagram,twitter,web){
+    this.facebook=facebook;
+    this.instagram=instagram;
+    this.twitter=twitter;
+    this.web=web;
+  }
+}
+
+
+export class Rightholder{
+  relation:string;
+  name:string;
+  phone:string;
+  id:string;
+  sharing:Sharing;
+  status: number; // indica si ha aprobado o no la foto.
+
+  constructor(relation , name,phone,id){
+    this.relation = relation;
+    this.name = name;
+    this.phone = phone;
+    this.id = id;
+    this.sharing = new Sharing(false,false,false,false);
+  }
+}
+
+export class Person{
+  id:number;
+  name:string;
+  phone:string;
+  minor:boolean;
+  rightholders:Array <Rightholder>;
+  constructor(name,phone,minor){
+    this.id = -1;
+    this.name = name;
+    this.phone = phone;
+    this.minor = minor;
+    this.rightholders = new Array();
+  }
+}
+
+export class Photo{
+  rowid:number;
+  remoteId: number;
+  name: string;
+  src: string;
+  owner: string;
+  status : number;
+  timestamp : string;
+  sharing : Sharing;
+  people : Array<Person>;
+
+  log: Log;
+
+  constructor(name,src,owner,status){
+    this.rowid = -1;
+    this.remoteId = -1;
+    this.name=name;
+    this.src=src;
+    this.owner=owner;
+    this.status=status;
+    this.people = new Array;
+    this.sharing = new Sharing(false,false,false,false);
+    this.log = new Log();
+  }
+
+  addPerson(name,phone,minor){
+    this.people.push(new Person(name,phone,minor))
+  }
+
+}
+
+export class Entry_log{
+  public text:string;
+  public timestamp:any;
+  constructor(text){
+    this.text = text;
+    this.timestamp = new Date();
+  }
+}
+
+export class Log{
+  public entries: Array <Entry_log>;
+  constructor(){
+    this.entries = new Array();
+  }
+  add(text){
+    this.entries.push(new Entry_log(text));
+  }
+}
+
+export class User{
+  rowid:number;
+  name: string;
+  phone: string;
+  dni:string;
+  email:string;
+  notifications: boolean;
+  backup:boolean;
+  facebook:boolean;
+  instagram:boolean;
+  twitter:boolean;
+  web:boolean;
+  timestamp:string;
+
+  constructor(name,phone){
+    this.rowid=-1;
+    this.name=name;
+    this.phone=phone;
+    this.dni="";
+    this.email="";
+    this.notifications=false;
+    this.backup=false;
+    this.facebook=true;
+    this.twitter=true;
+    this.instagram=true;
+    this.web=true;
+  }
+}
 /*
 export class socialNetworkModel extends superModel
 {

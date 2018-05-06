@@ -13,9 +13,9 @@
  </ion-navbar>
 </ion-header>
 
-<ion-content no-padding>
+<ion-content>
   <ion-list no-padding>
-    <photo-item *ngFor="let photo of capturas" [showPeople]="true" [image]="photo" [action]="'enviar'" [stickers]="true"></photo-item>
+    <photo-item *ngFor="let photo of capturas" [showPeople]="true" [image]="photo" [sharing]="photo.sharing" [action]="'enviar'" [stickers]="true"></photo-item>
   </ion-list>
 
 </ion-content>

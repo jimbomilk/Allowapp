@@ -1,9 +1,9 @@
-// Ejecutar la app en simulador
+** Ejecutar la app en simulador
 ionic cordova run android --livereload
 //En el device
 ionic cordova run android --device
 
-//ERROR:
+** ERROR:
 Execution failed for task ':transformClassesWithDexForDebug'.
 > com.android.build.api.transform.TransformException: com.android.ide.common.process.ProcessException: java.util.concurrent.ExecutionException: com.android.dex.DexException: Multiple d
 ex files define Lorg/apache/cordova/BuildHelper;
@@ -14,3 +14,18 @@ SOLUCION:
 3. Change : config.xml in your project folder use "6.2.3" not "^6.2.3",
 then delete the platforms/android folder, re-run cordova prepare android, and cordova build android
 
+** Actualizar plugins Cordova :
+1. Instalar esto : npm install -g cordova-check-plugins
+2 Ejecutar : cordova-check-plugins --update=auto
+
+
+** Error Cordova.js not found al ejecutar en simulador
+You need go to node_modules/@ionic/app-scripts/dist/dev-server/serve-config.js
+
+and replace
+
+exports.ANDROID_PLATFORM_PATH = path.join('platforms', 'android', 'assets', 'www');
+
+to
+
+exports.ANDROID_PLATFORM_PATH = path.join('platforms', 'android', 'app', 'src', 'main', 'assets', 'www');

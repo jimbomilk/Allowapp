@@ -4,10 +4,10 @@ import {Camera} from "@ionic-native/camera";
 import {ToastProvider} from "../../providers/toast/toast";
 import {userModel} from "../../models/model";
 import {FormBuilder, Validators} from "@angular/forms";
-import {Events} from "ionic-angular";
+import {Events, IonicPage, NavController} from "ionic-angular";
 import {DataProvider} from "../../providers/data/data";
-import {DbProvider} from "../../providers/db/db";
 
+@IonicPage()
 @Component({
   selector: 'profile-contact',
   templateUrl: 'profile.html'
@@ -23,10 +23,11 @@ export class ProfilePage {
 
 
   constructor(
+    public navController:NavController,
     public alertService: AlertProvider,
     public toastCtrl: ToastProvider,
     public camera: Camera,
-    public data: DataProvider, public db:DbProvider, public formBuilder: FormBuilder,public events:Events
+    public data: DataProvider, public formBuilder: FormBuilder,public events:Events
   ) {
 
     let re =  /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -35,6 +36,7 @@ export class ProfilePage {
       name: ['', Validators.compose([Validators.maxLength(20), Validators.pattern('[a-zA-Z]*')])],
       phone: ['', Validators.compose([Validators.maxLength(20), Validators.pattern('[0-9]*'), Validators.required])],
       email: ['', Validators.compose([Validators.pattern(re)])],
+      password : [''],
       notifications : [false],
       backup : [false],
       facebook: [false],
@@ -70,20 +72,6 @@ export class ProfilePage {
     this.toastCtrl.create('Configuración de '+network+ ' modificada');
   }
 
-
-  updateProfileImage() {
-    this.camera.getPicture({
-      quality: 50,
-      allowEdit: true,
-      cameraDirection: this.camera.Direction.FRONT,
-      destinationType: this.camera.DestinationType.DATA_URL
-    }).then((imageData) => {
-      this.user.imageUrl = imageData;
-    }, (err) => {
-      this.toastCtrl.create('Error: ' + err);
-    });
-  }
-
   logOut() {
     this.alertService.presentAlertWithCallback('¿Estás seguro?',
       '¿Deseas salir de la aplicación?').then((yes) => {
@@ -96,9 +84,9 @@ export class ProfilePage {
   ionViewDidLoad(){
     this.data.getProfile().then ( (val) =>{
       this.profile = val;
-      for (let prop in this.profile.extra) {
+      for (let prop in this.profile) {
         if (this.userForm.controls[prop])
-          this.userForm.controls[prop].setValue(this.profile.extra[prop]);
+          this.userForm.controls[prop].setValue(this.profile[prop]);
       }
     }).catch(e=>{
       console.log("Error al cargar datos de usuario.");
@@ -106,25 +94,36 @@ export class ProfilePage {
 
   }
 
-
-
-  ionViewWillLeave() {
-    //Creamos el modelo
-
+  save(){
     if (this.userForm.valid) {
       this.profile.name = this.userForm.value.name;
+      this.data.user.name = this.userForm.value.name;
       this.profile.phone = this.userForm.value.phone;
+      this.data.user.phone = this.userForm.value.phone;
       this.profile.email = this.userForm.value.email;
-      this.profile.extra = this.userForm.value;
+      this.data.user.email = this.userForm.value.email;
+      this.profile.password = this.userForm.value.password;
+      this.data.user.password = this.userForm.value.password;
 
       //Guardar datos
-      this.db.saveData(new userModel, this.profile).catch(e => {
+      this.data.save(new userModel, this.profile).then ( () =>{
+        this.toastCtrl.create('Datos de usuario actualizados correctamente.');
+
+        //this.navController.pop();
+      })
+        .catch(e => {
         this.toastCtrl.create('Error de base de datos.');
         this.events.publish('badge4:updated', "!");
       });
     }else{
-        this.toastCtrl.create('Datos de usuario incompletos.');
-        this.events.publish('badge4:updated', "!");
+      this.toastCtrl.create('Datos de usuario incompletos.');
+      this.events.publish('badge4:updated', "!");
     }
+  }
+
+  ionViewWillLeave() {
+    //Creamos el modelo
+
+    this.save();
   }
 }

@@ -13,10 +13,11 @@ import { DbProvider } from '../providers/db/db';
 import {SQLite} from "@ionic-native/sqlite";
 import { File } from '@ionic-native/file';
 import { FilePath } from '@ionic-native/file-path';
-import { Camera } from '@ionic-native/camera';
+import { Camera  } from '@ionic-native/camera';
 import {Contacts} from "@ionic-native/contacts";
 import {SocialSharing} from "@ionic-native/social-sharing";
 import { AuthProvider } from '../providers/auth/auth';
+import {SMS} from "@ionic-native/sms";
 
 
 @NgModule({
@@ -47,7 +48,8 @@ import { AuthProvider } from '../providers/auth/auth';
     FilePath,
     Contacts,
     SocialSharing,
-    AuthProvider
+    AuthProvider,
+    SMS
   ]
 })
 export class AppModule {}

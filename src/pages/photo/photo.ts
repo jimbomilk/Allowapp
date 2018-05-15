@@ -1,16 +1,12 @@
 import {Component, ViewChild} from '@angular/core';
 import {
-  ActionSheetController, Events, IonicPage, ModalController, NavController, Platform,
+  ActionSheetController, IonicPage, LoadingController, ModalController, NavController, Platform,
   ToastController
 } from 'ionic-angular';
 import {DataProvider} from "../../providers/data/data";
 import {Camera} from '@ionic-native/camera';
-import {File} from "@ionic-native/file";
-import {FilePath} from "@ionic-native/file-path";
-import {Photo, photoModel} from "../../models/model";
+import {Person, Photo, Rightholder, Sharing, User} from "../../models/model";
 import * as Constants from '../../models/constants';
-import {DbProvider} from "../../providers/db/db";
-declare var cordova: any;
 
 @IonicPage()
 @Component({
@@ -19,48 +15,49 @@ declare var cordova: any;
 })
 export class PhotoPage {
   @ViewChild('photo-item') photoItem;
-  lastImage: string = null;
-  public profile : any;
-  public base64Image : string;
+  public profile : User;
   public status_photo = Constants.STATUS_CREADA;
-  capturas: any;
-  constructor(public navCtrl: NavController,private data: DataProvider,
-              private camera: Camera,
-              private file: File, private filePath: FilePath,
-              private platform: Platform, public actionSheetCtrl: ActionSheetController,
-              public toastCtrl: ToastController,
-              private modalCtrl:ModalController,
-              private db:DbProvider,
-              public events: Events)
-  {
-    events.subscribe('photo:enviar', (image) => {
-      this.photoAction(image);
-    });
+  public actionText:string;
+  capturas: Array<Photo>;
+  loading:any;
 
-    events.subscribe('photo:newperson', (image,item) => {
-      this.addPerson2Image(image,item)
-    });
+  constructor(private data: DataProvider,
+              private camera: Camera,
+              private platform: Platform, public actionSheetCtrl: ActionSheetController,
+              private toastCtrl: ToastController,
+              private modalCtrl:ModalController,
+              private loadingController:LoadingController,
+              private nav: NavController)
+  {
+    this.actionText = 'Enviar';
   }
 
-  addPerson2Image(image,item){
+  addPerson2Image(image){
     console.log('Añadir persona');
-    let person = {name:"",phone:"",email:"",minor:false,sticker:item};
+    let person = new Person("","",false);
     image.people.unshift(person);
 
     let contact = this.modalCtrl.create('ContactosPage');
-    contact.onDidDismiss(data => {
-      console.log({dataOnDidDismiss:data});
-      if(data.estado){
-        console.log(data)
-        if (!data.minor) {
-          person.name = data.contacto.displayName;
-          person.phone = data.contacto.phoneNumbers[0].value;
+    contact.onDidDismiss(item => {
+      //console.log({dataOnDidDismiss:item});
+      if(item.estado){
+        console.log(item)
+        if (!item.minor) {
+          person.name = item.contacto.displayName;
+          person.phone = item.contacto.phoneNumbers[0].value;
         }else{
-          person.name = 'Menor de edad sin teléfono'
+          person.name = 'Menor de edad'
           person.phone = "";
         }
-        person.minor = data.minor;
-        this.data.save(new photoModel(),image).then( res =>{
+        person.minor = item.minor;
+        if (!person.minor) {
+          let rh = new Rightholder('propio', person.name, person.phone, "");
+          rh.sharing = image.sharing;
+          person.rightholders.push(rh);
+        }
+
+        this.data.saveImagen(image).then ( () =>{
+
           this.presentToast(person.name + ' añadida');
         });
       }
@@ -74,37 +71,29 @@ export class PhotoPage {
     this.platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
-      this.data.getProfile()
-        .then((p) => this.profile = p)
-        .catch(e=>{
-          console.log("Error al cargar profile.")
+      this.loading = this.loadingController.create({ content: "Cargando, espere por favor..." });
+      this.loading.present();
+      //Cargamos las fotos
+      this.data.loadPhotos().then(() => {
+          this.capturas = this.data.getCapturadas();
+          this.loading.dismissAll();
         })
-        .then(()  => this.data.loadPhotos())
-        .catch(e=>{
-          console.log("Error al cargar fotos.")
-        })
-        .then((r) => this.capturas = this.data.getCapturadas())
         .catch(e=>{
           console.log("Error al cargar datos.");
-        })
+          this.loading.dismissAll();
+        });
+
+      // Cargamos el usuario
+      this.data.getProfile();
     });
 
   }
 
-  photoAction(image){
-    this.navCtrl.push('PhotoSendPage',{photo:image,user:this.data.user});
-  }
+
 
   public restore(){
-    this.db.connect()
-
-     .then(() => this.db.dropTables())
-     .then(() => this.db.createTables())
-     .then(() => this.data.loadDataTest())
-
-      .catch( e=> {
-        console.log("Error",e);
-      })
+    this.data.restore();
+    //this.capturas = this.data.getCapturadas();
 
   }
 
@@ -137,53 +126,34 @@ export class PhotoPage {
     // Create options for the Camera Dialog
     var options = {
       quality: 100,
+      destinationType: this.camera.DestinationType.DATA_URL,
       sourceType: sourceType,
       saveToPhotoAlbum: false,
       correctOrientation: true
     };
 
+    this.loading = this.loadingController.create({ content: "Cargando, espere por favor..." });
+    this.loading.present();
+
     // Get the data of an image
-    this.camera.getPicture(options).then((imagePath) => {
-      // Special handling for Android library
-      if (this.platform.is('android') && sourceType === this.camera.PictureSourceType.PHOTOLIBRARY) {
-        this.filePath.resolveNativePath(imagePath)
-          .then(filePath => {
-            let correctPath = filePath.substr(0, filePath.lastIndexOf('/') + 1);
-            let currentName = imagePath.substring(imagePath.lastIndexOf('/') + 1, imagePath.lastIndexOf('?'));
-            this.copyFileToLocalDir(correctPath, currentName, this.createFileName());
-          });
-      } else {
-        var currentName = imagePath.substr(imagePath.lastIndexOf('/') + 1);
-        var correctPath = imagePath.substr(0, imagePath.lastIndexOf('/') + 1);
-        this.copyFileToLocalDir(correctPath, currentName, this.createFileName());
+    this.camera.getPicture(options).then((imageData) => {
+      let photo = new Photo("new"+Date.now(),'data:image/jpeg;base64,'+imageData,"",Constants.STATUS_CREADA);
+      if (this.profile){
+        photo.owner = this.profile.phone;
+        photo.sharing = new Sharing(this.profile.facebook,this.profile.instagram,this.profile.twitter,this.profile.web);
+      }else{
+        // como no existe profile ponemos valores por defecto
+        photo.owner = "";
+        photo.sharing = new Sharing("initial","initial","initial","initial");
       }
+      this.capturas.push(photo);
+      this.loading.dismissAll();
     }, (err) => {
       this.presentToast('Error al cargar la imagen.');
+      this.loading.dismissAll();
     });
   }
 
-  // Create a new name for the image
-  private createFileName() {
-    var d = new Date(),
-      n = d.getTime(),
-      newFileName =  n + ".jpg";
-    return newFileName;
-  }
-
-// Copy the image to a local folder
-  private copyFileToLocalDir(namePath, currentName, newFileName) {
-    this.file.copyFile(namePath, currentName, cordova.file.dataDirectory, newFileName).then(success => {
-      this.lastImage = newFileName;
-      // Creamos un objeto photo y lo insertamos en bbdd
-      //let entradalog = "Imagen creada el: " + new Date() + " por " + this.profile.phone;
-
-      let photo = new Photo("Nueva imagen",newFileName,this.profile.phone,Constants.STATUS_CREADA);
-      this.capturas.push(photo);
-
-    }, error => {
-      this.presentToast('Error al guardar la imagen.');
-    });
-  }
 
   private presentToast(text) {
     let toast = this.toastCtrl.create({
@@ -194,17 +164,19 @@ export class PhotoPage {
     toast.present();
   }
 
-// Always get the accurate path to your apps folder
-  public pathForImage(img) {
-    if (img === null) {
-      return '';
-    } else {
-      return cordova.file.dataDirectory + img;
-    }
-  }
-
-  ionViewDidLeave() {
-
+  sender(image){
+    let modal = this.modalCtrl.create('PhotoSendPage',{'photo':image});
+    modal.onDidDismiss(data => {
+      if(data.result){
+        this.capturas = this.capturas.filter((item)=>{
+          item.name != image.name;
+        })
+      }
+      else if(data.redirection){
+        this.nav.push('ProfilePage');
+      }
+    });
+    modal.present();
   }
 
 

@@ -1,10 +1,10 @@
 import {Component} from '@angular/core';
 import {AlertProvider} from "../../providers/alert/alert";
-import {Camera} from "@ionic-native/camera";
 import {ToastProvider} from "../../providers/toast/toast";
-import {userModel} from "../../models/model";
+import {User} from "../../models/model";
 import {FormBuilder, Validators} from "@angular/forms";
-import {Events, IonicPage, NavController} from "ionic-angular";
+import {Events, IonicPage, NavController, NavParams} from "ionic-angular";
+import {DbProvider} from "../../providers/db/db";
 import {DataProvider} from "../../providers/data/data";
 
 @IonicPage()
@@ -18,27 +18,28 @@ export class ProfilePage {
   placeholderPicture = 'https://api.adorable.io/avatars/50/abott@adorable.png';
   user : any;
   userForm:any;
-  profile : any;
-
+  redirection :boolean = false;
 
 
   constructor(
     public navController:NavController,
+    public navParameters:NavParams,
     public alertService: AlertProvider,
     public toastCtrl: ToastProvider,
-    public camera: Camera,
-    public data: DataProvider, public formBuilder: FormBuilder,public events:Events
+    public db: DbProvider,
+    public formBuilder: FormBuilder,
+    public events:Events,
+    private data:DataProvider,
+
   ) {
 
     let re =  /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
     this.userForm = formBuilder.group({
-      name: ['', Validators.compose([Validators.maxLength(20), Validators.pattern('[a-zA-Z]*')])],
+      name: ['', Validators.compose([Validators.maxLength(20), Validators.pattern('[a-zA-Z]*'), Validators.required])],
       phone: ['', Validators.compose([Validators.maxLength(20), Validators.pattern('[0-9]*'), Validators.required])],
-      email: ['', Validators.compose([Validators.pattern(re)])],
-      password : [''],
-      notifications : [false],
-      backup : [false],
+      email: ['', Validators.compose([Validators.pattern(re), Validators.required])],
+      password : ['',Validators.compose([Validators.required])],
       facebook: [false],
       instagram: [false],
       twitter: [false],
@@ -47,24 +48,6 @@ export class ProfilePage {
 
 
 
-  }
-
-  toggleNotifications() {
-    this.user.value.notifications = !this.user.value.notifications;
-    if (this.user.enableNotifications) {
-      this.toastCtrl.create('Notificaciones habilitadas.');
-    } else {
-      this.toastCtrl.create('Notificaciones deshabilitadas.');
-    }
-  }
-
-  toggleBackup() {
-    this.user.value.backup != this.user.value.backup;
-    if (this.user.enableBackup) {
-      this.toastCtrl.create('Backup habilitado.');
-    } else {
-      this.toastCtrl.create('Backup deshabilitado.');
-    }
   }
 
   toggleSocial(network) {
@@ -82,39 +65,55 @@ export class ProfilePage {
   }
 
   ionViewDidLoad(){
-    this.data.getProfile().then ( (val) =>{
-      this.profile = val;
-      for (let prop in this.profile) {
-        if (this.userForm.controls[prop])
-          this.userForm.controls[prop].setValue(this.profile[prop]);
-      }
-    }).catch(e=>{
-      console.log("Error al cargar datos de usuario.");
-    });
+    this.redirection = this.navParameters.get('redirection');
+
+    this.user = this.data.user;
+    if (!this.user){
+      this.data.getProfile()
+        .then( (res) => {
+          this.user= res;
+          this.loadUser();
+        })
+        .catch( ()=>{
+          this.user = new User('');
+      });
+    }else{
+      this.loadUser();
+    }
+  }
+
+  loadUser(){
+    for (let prop in this.user) {
+      if (this.userForm.controls[prop])
+        this.userForm.controls[prop].setValue(this.user[prop]);
+    }
+  }
+
+  deleteAll(){
 
   }
 
   save(){
     if (this.userForm.valid) {
-      this.profile.name = this.userForm.value.name;
-      this.data.user.name = this.userForm.value.name;
-      this.profile.phone = this.userForm.value.phone;
-      this.data.user.phone = this.userForm.value.phone;
-      this.profile.email = this.userForm.value.email;
-      this.data.user.email = this.userForm.value.email;
-      this.profile.password = this.userForm.value.password;
-      this.data.user.password = this.userForm.value.password;
+      this.user.name = this.userForm.value.name;
+      this.user.email = this.userForm.value.email;
+      this.user.phone = this.userForm.value.phone;
+      this.user.password = this.userForm.value.password;
+      this.user.facebook=this.userForm.value.facebook?"facebook":"";
+      this.user.instagram=this.userForm.value.instagram?"instagram":"";
+      this.user.twitter=this.userForm.value.twitter?"twitter":"";
+      this.user.web=this.userForm.value.web?"web":"";
 
-      //Guardar datos
-      this.data.save(new userModel, this.profile).then ( () =>{
+      this.data.saveProfile(this.user).then ( () =>{
         this.toastCtrl.create('Datos de usuario actualizados correctamente.');
 
-        //this.navController.pop();
+        if (this.redirection)
+          this.navController.pop();
       })
-        .catch(e => {
-        this.toastCtrl.create('Error de base de datos.');
-        this.events.publish('badge4:updated', "!");
-      });
+
+
+
+
     }else{
       this.toastCtrl.create('Datos de usuario incompletos.');
       this.events.publish('badge4:updated', "!");
@@ -124,6 +123,6 @@ export class ProfilePage {
   ionViewWillLeave() {
     //Creamos el modelo
 
-    this.save();
+    //this.save();
   }
 }

@@ -34,30 +34,14 @@
     <ion-item>
       <ion-input type="password"  formControlName="password" no-border></ion-input>
       <ion-label stacked>Password</ion-label>
-      <ion-icon item-end name='lock' ></ion-icon>
+      <button ion-button outline  (click)="save()" item-end icon-left>
+        <ion-icon name='log-in' ></ion-icon>
+        Guardar
+      </button>
     </ion-item>
-
-    <ion-list-header>
-      <ion-item no-padding no-margin>
-        General
-
-      </ion-item>
-    </ion-list-header>
-      <ion-item>
-        <ion-toggle formControlName="notifications" (click)="toggleNotifications()"></ion-toggle>
-        <ion-label class="label"> Habilitar notificaciones </ion-label>
-        <ion-icon name='notifications' item-start></ion-icon>
-      </ion-item>
-      <ion-item>
-        <ion-toggle formControlName="backup" (click)="toggleBackup()"></ion-toggle>
-        <ion-label class="label"> Habilitar salvaguarda </ion-label>
-        <ion-icon name='cloud-upload' item-start></ion-icon>
-      </ion-item>
-
     <ion-list-header>
       <ion-item no-padding>
-        Redes Sociales
-
+        Configura tus redes favoritas de publicación
       </ion-item>
     </ion-list-header>
     <ion-item>
@@ -88,10 +72,17 @@
       Otros
     </ion-list-header>
     <ion-item>
-      <ion-icon name='power' item-start></ion-icon>
-      <button ion-button (click)="logOut()" item-end>
-        Salir
+      <button ion-button outline  (click)="save()" item-end icon-left>
+        <ion-icon name='log-in' ></ion-icon>
+        Guardar
       </button>
     </ion-item>
+    <ion-item>
+      <ion-icon name='power' item-start></ion-icon>
+      <button ion-button (click)="logOut()" item-end>
+        Salir de la aplicación
+      </button>
+    </ion-item>
+
   </ion-list>
 </ion-content>

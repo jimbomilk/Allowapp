@@ -14,8 +14,8 @@
 </ion-header>
 
 <ion-content>
-  <ion-list no-padding>
-    <photo-item *ngFor="let photo of capturas" [showPeople]="true" [image]="photo" [sharing]="photo.sharing" [action]="'enviar'" [stickers]="true"></photo-item>
+  <ion-list>
+    <photo-item *ngFor="let photo of capturas" showPeople="true" [profile]="profile" [image]="photo" (tosend)="sender($event)" actionText="Enviar" (addperson)="addPerson2Image($event)"></photo-item>
   </ion-list>
 
 </ion-content>

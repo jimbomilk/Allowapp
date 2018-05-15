@@ -1,9 +1,7 @@
 import { Component } from '@angular/core';
 import {IonicPage, NavController} from 'ionic-angular';
 import {DataProvider} from "../../providers/data/data";
-import * as Constants from '../../models/constants';
-import {FormControl} from "@angular/forms";
-import 'rxjs/add/operator/debounceTime';
+import {Photo} from "../../models/model";
 @IonicPage()
 @Component({
   selector: 'page-published',
@@ -11,36 +9,34 @@ import 'rxjs/add/operator/debounceTime';
 
 })
 export class PublishedPage {
-  searchTerm: string = '';
-  searchControl: FormControl;
-  searching: any = false;
-  filterItem : any;
   showPeople:any;
-
-  published : any[];
-  shown : any[];
+  profile:any;
   source: any;
-  bySource: boolean;
+  recibidas : Array<Photo>;
+  shown : Array<Photo>;
+
   constructor(public navCtrl: NavController,private data: DataProvider) {
-    this.source = "0";
-    this.published = new Array;
-    this.shown = new Array;
-    this.bySource = false;
+    this.source = 'propias';
+    this.recibidas = new Array();
+    this.shown = new Array();
     this.showPeople = false;
-    this.searchControl = new FormControl();
+    //this.searchControl = new FormControl();
 
   }
 
-  ionViewDidLoad()
-  {
+  ionViewWillEnter() {
     this.shown = this.data.photos;
+    this.profile = this.data.user;
 
-    this.searchControl.valueChanges.debounceTime(700).subscribe(search => {
+    this.data.getRecibidas().subscribe(data => {
+      this.recibidas = data;
+    });
+      /*this.searchControl.valueChanges.debounceTime(700).subscribe(search => {
       this.searching = false;
       this.setFilteredItems();
-    });
+    });*/
   }
-
+/*
   setFilteredItems() {
 
     this.shown = this.filterItems(this.searchTerm);
@@ -63,23 +59,8 @@ export class PublishedPage {
   onSearchInput(){
     this.searching = true;
   }
+*/
 
-  sourceChanged(value){
-    if (value._value == Constants.STATUS_ENVIADA) {
-      this.bySource = true;
-      this.filterItem = 'byPeople';
-      this.showPeople = true;
-      this.shown = this.data.getEnviadas();
-    }else if (value._value == Constants.STATUS_RECIBIDA) {
-      this.shown = this.data.getRecibidas();
-    }
-    else {
-      this.bySource = false;
-      this.filterItem = 'byOwner'
-      this.shown = this.data.photos;
-    }
-
-  }
 
 
 }

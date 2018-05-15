@@ -1,3 +1,6 @@
+
+import * as Constants from './constants';
+
 /*************************************** DDBB MODEL *********************************/
 export class superModel{
 
@@ -139,12 +142,29 @@ export class photoModel extends superModel
 
 /*********************************   DATA MODEL *********************************/
 
+export class Link{
+  owner:string;
+  name:string;
+  phone:string;
+  rhname:string;
+  rhphone:string;
+  link:string;
+  constructor(owner,name,phone,rhname,rhphone,link){
+    this.owner=owner;
+    this.name=name;
+    this.phone=phone;
+    this.rhname=rhname;
+    this.rhphone=rhphone;
+    this.link=link;
+  }
+}
+
 export class Sharing{
-  facebook:boolean;
-  instagram:boolean;
-  twitter:boolean;
-  web:boolean;
-  constructor(facebook,instagram,twitter,web){
+  facebook:string;
+  instagram:string;
+  twitter:string;
+  web:string;
+  constructor(facebook="",instagram="",twitter="",web=""){
     this.facebook=facebook;
     this.instagram=instagram;
     this.twitter=twitter;
@@ -154,28 +174,30 @@ export class Sharing{
 
 
 export class Rightholder{
+  documentId:string;
   relation:string;
   name:string;
   phone:string;
-  id:string;
   sharing:Sharing;
   status: number; // indica si ha aprobado o no la foto.
 
-  constructor(relation , name,phone,id){
+  constructor(relation , name,phone, documentId){
     this.relation = relation;
     this.name = name;
     this.phone = phone;
-    this.id = id;
-    this.sharing = new Sharing(false,false,false,false);
+    this.documentId = documentId;
+    this.sharing = new Sharing();
+    this.status = Constants.PENDING; // Por defecto todos los rightholders tienen status pending para cada nueva foto
   }
 }
+
 
 export class Person{
   id:number;
   name:string;
   phone:string;
   minor:boolean;
-  rightholders:Array <Rightholder>;
+  rightholders:Array<Rightholder>;
   constructor(name,phone,minor){
     this.id = -1;
     this.name = name;
@@ -183,11 +205,28 @@ export class Person{
     this.minor = minor;
     this.rightholders = new Array();
   }
+
+}
+
+
+export class MutablePhoto{
+  status: number;
+  sharing:Sharing;
+  people:Array<Person>;
+  log: Log;
+
+  constructor (photo:Photo){
+    this.status = photo.status;
+    this.sharing = photo.sharing;
+    this.people = photo.people;
+    this.log = photo.log;
+  }
 }
 
 export class Photo{
   rowid:number;
   remoteId: number;
+  remoteSrc: string;
   name: string;
   src: string;
   owner: string;
@@ -195,23 +234,99 @@ export class Photo{
   timestamp : string;
   sharing : Sharing;
   people : Array<Person>;
-
   log: Log;
 
-  constructor(name,src,owner,status){
-    this.rowid = -1;
-    this.remoteId = -1;
+  constructor(name:string='',
+              src:string='',
+              owner:string='',
+              status:number=Constants.STATUS_CREADA,
+              rowid:number=-1,
+              remoteid:number=-1,
+              remoteSrc:string="",
+              people:Array<Person>=new Array(),
+              sharing:Sharing=new Sharing(),
+              log:Log = new Log(),
+              timestamp:string = ''){
+    this.rowid = rowid;
+    this.remoteId = remoteid;
     this.name=name;
     this.src=src;
     this.owner=owner;
     this.status=status;
-    this.people = new Array;
-    this.sharing = new Sharing(false,false,false,false);
-    this.log = new Log();
+    this.people = people;
+    this.sharing = sharing;
+    this.log =log;
+    this.timestamp = timestamp;
+    this.remoteSrc = remoteSrc;
   }
+
+
 
   addPerson(name,phone,minor){
     this.people.push(new Person(name,phone,minor))
+  }
+
+  public findRightHolder(phone)
+  {
+    if (!this.people)
+      return null;
+
+    for (let i in this.people) {
+      for (let j in this.people[i].rightholders) {
+        if (this.people[i].rightholders[j].phone && this.people[i].rightholders[j].phone == phone) {
+          return this.people[i].rightholders[j];
+        }
+      }
+    }
+  }
+
+  public rightholders()
+  {
+    let rightholders = new Array();
+    for (let i in this.people) {
+      for (let j in this.people[i].rightholders){
+        rightholders.push(this.people[i].rightholders[j])
+      }
+    }
+    return rightholders;
+  }
+  //buscamos ese rightholder en la imagen
+  public changeRightHolderStatus(phone,newstatus) {
+    if (!this.people)
+      return false;
+
+    let rh = this.findRightHolder(phone);
+    if (rh)
+      rh.status = newstatus;
+    else
+      return false;
+
+  }
+
+  public getSharing(profile){
+    if (!profile)
+      return this.sharing;
+    if (this.owner == profile.phone) {
+      return this.sharing;
+    }else{
+      let rh = this.findRightHolder(profile.phone);
+      if (rh){
+        return rh.sharing;
+      }else {
+        return null;
+      }
+    }
+  }
+
+  public getTextSharing() {
+    if (this.status == Constants.STATUS_CREADA) {
+     return "Plataformas en las que solicitas compartir la imagen (click para cambiar):";
+    }else if (this.status == Constants.STATUS_PROCESED){
+      return "Consentimiento solicitado para las siguientes plataformas:";
+    }else if (this.status == Constants.STATUS_PENDING){
+      return "Plataformas en las que has solicitado consentimiento";
+    }
+    return "";
   }
 
 }
@@ -241,26 +356,24 @@ export class User{
   phone: string;
   dni:string;
   email:string;
-  notifications: boolean;
-  backup:boolean;
-  facebook:boolean;
-  instagram:boolean;
-  twitter:boolean;
-  web:boolean;
+  password:string;
+  facebook:string;
+  instagram:string;
+  twitter:string;
+  web:string;
   timestamp:string;
 
-  constructor(name,phone){
+  constructor(name){
     this.rowid=-1;
     this.name=name;
-    this.phone=phone;
+    this.phone="";
     this.dni="";
     this.email="";
-    this.notifications=false;
-    this.backup=false;
-    this.facebook=true;
-    this.twitter=true;
-    this.instagram=true;
-    this.web=true;
+    this.password="";
+    this.facebook="";
+    this.twitter="";
+    this.instagram="";
+    this.web="";
   }
 }
 /*

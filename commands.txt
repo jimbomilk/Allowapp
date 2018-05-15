@@ -29,3 +29,8 @@ exports.ANDROID_PLATFORM_PATH = path.join('platforms', 'android', 'assets', 'www
 to
 
 exports.ANDROID_PLATFORM_PATH = path.join('platforms', 'android', 'app', 'src', 'main', 'assets', 'www');
+
+
+//Para evitar el error del graddle
+<engine name="android" spec="6.2.2" />
+cordova platform update android@6.2.2

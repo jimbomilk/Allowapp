@@ -106,46 +106,4 @@ ion-card {
 }
 
 
-ion-icon {
-  &[class*="allowapp-"] {
-    // Instead of using the font-based icons
-    // We're applying SVG masks
-    mask-size: contain;
-    mask-position: 50% 50%;
-    mask-repeat: no-repeat;
-    background: currentColor;
-    width: 1em;
-    height: 1em;
-  }
-  // custom icons
-  &[class*="allowapp-sticker1"] {
-    mask-image: url(../assets/images/stickers/sticker1.svg);
-  }
-  &[class*="allowapp-sticker2"] {
-    mask-image: url(../assets/images/stickers/sticker2.svg);
-  }
-  &[class*="allowapp-sticker3"] {
-    mask-image: url(../assets/images/stickers/sticker3.svg);
-  }
-  &[class*="allowapp-sticker4"] {
-    mask-image: url(../assets/images/stickers/sticker4.svg);
-  }
-  &[class*="allowapp-sticker5"] {
-    mask-image: url(../assets/images/stickers/sticker5.svg);
-  }
-  &[class*="allowapp-sticker6"] {
-    mask-image: url(../assets/images/stickers/sticker6.svg);
-  }
-  &[class*="allowapp-sticker7"] {
-    mask-image: url(../assets/images/stickers/sticker7.svg);
-  }
-  &[class*="allowapp-sticker8"] {
-    mask-image: url(../assets/images/stickers/sticker8.svg);
-  }
-  &[class*="allowapp-sticker9"] {
-    mask-image: url(../assets/images/stickers/sticker9.svg);
-  }
-
-
-}
 

@@ -1,0 +1,37 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>
+      Contactos
+    </ion-title>
+    <ion-buttons end>
+      <button ion-button icon-only (click)="modalNuevoContacto()">
+        <ion-icon name="add-circle"></ion-icon>
+      </button>
+    </ion-buttons>
+  </ion-navbar>
+</ion-header>
+
+<ion-content>
+
+  <ion-searchbar [(ngModel)]="searchTerm" [formControl]="searchControl" (ionInput)="onSearchInput()"></ion-searchbar>
+
+  <div *ngIf="searching" class="spinner-container">
+    <ion-spinner></ion-spinner>
+  </div>
+
+
+
+  <ion-list>
+    <ion-item *ngIf="minors">
+      Menor de edad, sin teléfono
+      <button item-end ion-button color="primary" (click)="selectMenor()"><small>Seleccionar</small></button>
+    </ion-item>
+    <ion-item *ngFor="let contacto of listaContactos">
+      {{contacto.displayName}} ({{contacto.phoneNumbers[0].value}})
+      <button item-end ion-button color="primary" (click)="selectContacto(contacto)"><small>Seleccionar</small></button>
+    </ion-item>
+  </ion-list>
+  <div padding>
+    <button ion-button color="danger" block (click)="dismiss(false)">Cancelar</button>
+  </div>
+</ion-content>

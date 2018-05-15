@@ -1,0 +1,72 @@
+<!--
+  Generated template for the PersonDetailsPage page.
+
+  See http://ionicframework.com/docs/components/#navigation for more info on
+  Ionic pages and navigation.
+-->
+<ion-header>
+
+  <ion-navbar>
+    <ion-title >Detalles</ion-title>
+  </ion-navbar>
+
+</ion-header>
+
+
+<ion-content>
+  <ion-list no-border>
+    <ion-list-header>
+      <ion-icon name="contact" color="danger" item-start></ion-icon>
+      Datos personales
+    </ion-list-header>
+    <ion-item no-lines>
+      <ion-label stacked>Nombre:</ion-label>
+      <ion-input type="text" [(ngModel)]="person.name" ></ion-input>
+    </ion-item>
+    <ion-row>
+      <ion-col>
+        <ion-item no-lines>
+          <ion-label stacked>Teléfono:</ion-label>
+          <ion-input type="text" [(ngModel)]="person.phone"></ion-input>
+        </ion-item>
+      </ion-col>
+      <ion-col>
+        <ion-item no-lines>
+          <ion-label>Menor de edad</ion-label>
+          <ion-checkbox  [(ngModel)]="person.minor" color="dark" item-left>      </ion-checkbox>
+        </ion-item>
+      </ion-col>
+    </ion-row>
+
+    <div *ngIf="!person?.minor">
+      <ion-list-header>
+        <ion-icon name="finger-print" color="danger" item-start></ion-icon>
+        Aprobación directa
+      </ion-list-header>
+      <signature [person]="person" (done)="addSignature($event)"></signature>
+    </div>
+    <div *ngIf="person?.minor" >
+
+
+
+          <ion-list-header>
+            <ion-icon name="contacts" color="danger" item-start></ion-icon>
+               Tutores legales
+            <button ion-button clear icon-only (click)="addTutor()" item-end>
+              <ion-icon name="add-circle"></ion-icon>
+            </button>
+          </ion-list-header>
+
+          <ion-list>
+            <ion-item *ngFor="let rightholder of person.rightholders;let i = index" class="border_bottom"  no-padding>
+              <tutor-details [tutor]="rightholder" [id]="i" (remove)="removeTutor($event)"></tutor-details>
+            </ion-item>
+          </ion-list>
+
+    </div>
+  </ion-list>
+  <ion-buttons text-center>
+    <button ion-button (click)="save()">Guardar</button>
+  </ion-buttons>
+
+</ion-content>

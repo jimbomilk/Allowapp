@@ -1,0 +1,52 @@
+<flash-card [flipStatus]="flipStatus" no-padding>
+
+  <ion-card  class="flash-card-front" no-padding>
+
+    <ion-card-content class="captacion">
+
+      <div  href="#" (click)="call2action($event)" class="ribbon top">
+        <img  src="./assets/images/ribbon_right.png" />
+        <div class="ribbon label">{{actionText}}</div>
+      </div>
+
+
+      <div  (click)="flip()">
+        <img id="mainImg" *ngIf="currentImage==null" [src]="image?.src"/>
+        <p class="infoImagen">Pulse sobre la imagen para más información.</p>
+
+      </div>
+      <photo-share [sharing]="sharing" [title]="textSharing"> </photo-share>
+       <div *ngIf="showPeople">
+
+          <ion-row text-left>
+            <ion-col col-7>
+              <div (click)="call2addPerson($event)">
+              <strong>¿Quién está en la foto?</strong>
+
+              <ion-icon name="add-circle" ></ion-icon>
+              </div>
+            </ion-col>
+            <ion-col col-2>
+              <strong>Menor</strong>
+            </ion-col>
+            <ion-col  col-3 text-center>
+              <strong>Acciones</strong>
+            </ion-col>
+          </ion-row>
+          <person *ngFor="let person of image.people" [photo]="image" [person]="person" no-padding (remove)="removePerson($event)"></person>
+
+      </div>
+      <photo-published item-content [photo]="image"></photo-published>
+
+
+    </ion-card-content>
+  </ion-card>
+
+
+  <ion-card class="flash-card-back" no-padding >
+    <ion-card-content >
+      <photo-info (click)="flip()"  [image]="image"></photo-info>
+    </ion-card-content>
+  </ion-card>
+
+</flash-card>

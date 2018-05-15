@@ -1,0 +1,23 @@
+<!-- Generated template for the PhotoApprovalComponent component -->
+<hr>
+  <photo-info-approval [rightholder]="rightholder" [active]="active"></photo-info-approval>
+
+<div *ngIf="rightholder.status!='pending'">
+<h2>Autoriza dando su consentimiento a que la imagen sea captada y pueda aparecer en las siguientes redes sociales:</h2>
+
+  <ion-list>
+    <photo-social *ngFor="let social of rightholder.sharing" [social]="social" [active]="active"></photo-social>
+  </ion-list>
+</div>
+<div *ngIf="rightholder.status=='pending'">
+  <button ion-button outline item-end icon-left>
+    <ion-icon name="star"></ion-icon>
+    Enviar recordatorio
+  </button>
+</div>
+<div *ngIf="rightholder.status=='request'">
+  <button ion-button outline item-end icon-left>
+    <ion-icon name="ribbon"></ion-icon>
+    Enviar
+  </button>
+</div>

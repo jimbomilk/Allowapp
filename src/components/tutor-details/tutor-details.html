@@ -1,0 +1,15 @@
+<!-- Generated template for the TutorDetailsComponent component -->
+<search-contacto item-content [person]="tutor" [minors]="false"></search-contacto>
+<ion-item no-lines>
+  <p *ngIf="signature" color="primary">Firma añadida.</p>
+  <button  ion-button clear icon-only (click)="sign()" item-end>
+    <ion-icon name="finger-print"></ion-icon>
+  </button>
+  <button  ion-button clear icon-only (click)="removeTutor()" item-end>
+    <ion-icon name="trash"></ion-icon>
+  </button>
+</ion-item>
+
+<ion-item *ngIf="edit_mode">
+ <signature [person]="tutor" item-content (done)="addSignature($event)"></signature>
+</ion-item>

@@ -1,0 +1,22 @@
+<ion-item no-padding>
+  <ion-label stacked>DNI:</ion-label>
+  <ion-input type="text" [(ngModel)]="person.dni" placeholder="Obligatorio para firma directa"></ion-input>
+</ion-item>
+<p> Por favor introduzca su firma:</p>
+<signature-pad [options]="signaturePadOptions"  id="signatureCanvas"></signature-pad>
+<ion-grid>
+  <ion-row>
+    <ion-col>
+      <p text-justify text-wrap> Pulsando ACEPTAR confirmo mi consentimiento para que esta imagen sea tratada por el responsable del tratamiento, quién solicita autorización, para los fines indicados en la ficha de consentimiento y en la información adicional proporcionada.
+      </p>
+    </ion-col>
+  </ion-row>
+  <ion-row>
+    <ion-col col-6>
+      <button ion-button full color="light" (click)="drawClear()">Limpiar</button>
+    </ion-col>
+    <ion-col col-6>
+      <button ion-button full color="secondary" (click)="drawComplete()">Aceptar</button>
+    </ion-col>
+  </ion-row>
+</ion-grid>

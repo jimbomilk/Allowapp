@@ -1,0 +1,34 @@
+<ion-row>
+  <ion-col col-7>
+    <search-contacto item-start  item-content [person]="person"></search-contacto>
+  </ion-col>
+  <ion-col col-2>
+    <ion-item item-content no-margin no-padding>
+    <ion-checkbox  item-start [(ngModel)]="person.minor" color="dark"></ion-checkbox>
+    </ion-item>
+  </ion-col>
+
+  <ion-col  col-3 text-center>
+    <ion-item item-content no-margin no-padding>
+      <button item-end ion-button clear icon-only (click)="details()">
+        <ion-icon name="create" ></ion-icon>
+      </button>
+      <button item-end ion-button color="danger" clear icon-only (click)="removePerson()">
+        <ion-icon  name="trash" ></ion-icon>
+      </button>
+    </ion-item>
+  </ion-col>
+</ion-row>
+
+
+
+
+
+
+
+
+
+
+
+
+

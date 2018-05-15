@@ -1,0 +1,21 @@
+<!-- Generated template for the PhotoInfoApprovalComponent component -->
+<h1 text-center>{{rightholder?.name}} con ID {{rightholder?.id}}</h1>
+
+
+
+<div class="card-details" text-center>
+  <h2 *ngIf="rightholder?.status=='pending'" class="danger">Pendiente</h2>
+
+  <ion-grid *ngIf="rightholder?.status!='pending'" no-padding>
+    <ion-row>
+      <ion-col>
+        <ion-label no-margin>Consiente</ion-label>
+        <ion-checkbox color="dark" checked="{{rightholder.status=='ok'}}"  disabled={{!active}}></ion-checkbox>
+      </ion-col>
+      <ion-col>
+        <ion-label no-margin>No consiente</ion-label>
+        <ion-checkbox color="dark" checked="{{rightholder.status=='ko'}}"  disabled={{!active}}></ion-checkbox>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</div>

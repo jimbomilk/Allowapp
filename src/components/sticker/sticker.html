@@ -1,0 +1,5 @@
+<!-- Generated template for the StickerComponent component -->
+
+<button  [style.top]="stick.sticker?.rectY" [item]="stick"  [style.left]="stick.sticker?.rectX"  mini class="stickStyle" clear icon-only  absolute-drag (drop)="newSticker($event)">
+  <div id="sticker{{stick.id}}" [ngClass]="'sticker'+((stick.id%8)+1)"></div>
+</button>
